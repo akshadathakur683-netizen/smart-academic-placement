@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Smart Academic Placement &amp; Skill Search Engine</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header>
+  <h1>Smart Academic Placement &amp; Skill Search Engine</h1>
+  <nav>
+    <button data-page="dashboard" class="active" onclick="showPage('dashboard')">Dashboard</button>
+    <button data-page="records" onclick="showPage('records')">Student Records</button>
+    <button data-page="skills" onclick="showPage('skills')">Skill Search</button>
+    <button data-page="filter" onclick="showPage('filter')">Candidate Filter</button>
+    <button data-page="results" onclick="showPage('results')">Candidate Results</button>
+    <button data-page="ranking" onclick="showPage('ranking')">Candidate Ranking</button>
+    <button data-page="ds" onclick="showPage('ds')">Data Structures</button>
+  </nav>
+</header>
+
+<main>
+
+  <section id="dashboard" class="page active">
+    <h2>Dashboard</h2>
+    <p class="uses">Uses: Inverted Index (skill counts)</p>
+    <div class="stats" id="stats"></div>
+    <div class="panel"><h3>Most common skills</h3><div id="topSkills"></div></div>
+  </section>
+
+  <section id="records" class="page">
+    <h2>Student Records</h2>
+    <p class="uses">Source: the students array in data.js</p>
+    <div id="recordsTable"></div>
+  </section>
+
+  <section id="skills" class="page">
+    <h2>Skill Search</h2>
+    <p class="uses">Uses: Trie (autocomplete) + Inverted Index (students per skill)</p>
+    <div class="panel">
+      <input type="text" id="skillInput" placeholder="Type a skill, for example: py" oninput="onSkillTyping()" autocomplete="off">
+      <div id="suggestions"></div>
+      <h3>Required skills</h3>
+      <div id="chosenSkills"></div>
+      <label class="check"><input type="checkbox" id="mustAll" onchange="renderSkillSearch()"> Student must have ALL selected skills</label>
+    </div>
+    <div id="skillMatches"></div>
+  </section>
+
+  <section id="filter" class="page">
+    <h2>Candidate Filter</h2>
+    <p class="uses">Uses: K-D Tree (range search on CGPA and test score)</p>
+    <div class="panel formrow">
+      <label>Min CGPA <input type="number" id="minCgpa" value="0" min="0" max="10" step="0.1"></label>
+      <label>Max CGPA <input type="number" id="maxCgpa" value="10" min="0" max="10" step="0.1"></label>
+      <label>Min test score <input type="number" id="minScore" value="0" min="0" max="100"></label>
+      <label>Max test score <input type="number" id="maxScore" value="100" min="0" max="100"></label>
+      <button class="btn" onclick="applyFilter()">Apply filter</button>
+    </div>
+    <div id="filterResults"></div>
+  </section>
+
+  <section id="results" class="page">
+    <h2>Candidate Results</h2>
+    <p class="uses">Uses: students from the skill search that are also inside the filter range</p>
+    <p id="resultsSummary"></p>
+    <div id="resultsTable"></div>
+  </section>
+
+  <section id="ranking" class="page">
+    <h2>Candidate Ranking</h2>
+    <p class="uses">Uses: weighted score + insertion sort (ranking.js)</p>
+    <p>Score = 40 &times; CGPA/10 + 30 &times; test score/100 + 30 &times; matched skills/required skills. If no skills are selected, the skill part is 0 for everyone.</p>
+    <div id="rankingTable"></div>
+  </section>
+
+  <section id="ds" class="page">
+    <h2>Data Structures</h2>
+    <p class="uses">How the pieces connect: Trie &rarr; Inverted Index gives the skill matches. K-D Tree gives the range matches. Both lists are combined, then ranked.</p>
+    <div class="dsgrid">
+      <div class="panel">
+        <h3>Trie</h3>
+        <p>A tree where each node is one letter. A path from the root spells a skill.</p>
+        <p>Used for: skill autocomplete and prefix matching.</p>
+        <p>Time: insert and search O(L), autocomplete O(L + size of the matches). L = length of the word.</p>
+        <p class="file">trie.js</p>
+      </div>
+      <div class="panel">
+        <h3>Inverted Index</h3>
+        <p>Maps each skill to the list of student IDs who have it, like the index at the back of a book.</p>
+        <p>Used for: finding students for one or many skills quickly.</p>
+        <p>Time: O(1) lookup per skill.</p>
+        <p class="file">invertedIndex.js</p>
+      </div>
+      <div class="panel">
+        <h3>K-D Tree</h3>
+        <p>A binary search tree that alternates between CGPA and test score at each level.</p>
+        <p>Used for: range filtering. Branches that cannot match are skipped.</p>
+        <p>Time: insert O(log n) on average. Range search about O(&radic;n + k) when balanced, O(n) in the worst case.</p>
+        <p class="file">kdtree.js</p>
+      </div>
+      <div class="panel">
+        <h3>Ranking algorithm</h3>
+        <p>Gives every candidate a score out of 100, then sorts from highest to lowest with insertion sort.</p>
+        <p>Used for: ordering the eligible candidates.</p>
+        <p>Time: O(n&sup2;) worst case, fine for a small list.</p>
+        <p class="file">ranking.js</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- Order matters: data first, then the data structures, then app.js -->
+<script src="js/data.js"></script>
+<script src="js/trie.js"></script>
+<script src="js/invertedIndex.js"></script>
+<script src="js/kdtree.js"></script>
+<script src="js/ranking.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
